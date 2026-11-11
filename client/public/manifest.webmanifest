@@ -1,0 +1,20 @@
+{
+  "name": "WorkPilot HR",
+  "short_name": "WorkPilot",
+  "description": "Attendance, leave, payslips and more, from your phone.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Check in / out", "url": "./", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "My payslips", "url": "./payslips", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ]
+}

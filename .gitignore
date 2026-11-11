@@ -1,0 +1,27 @@
+# dependencies and builds
+node_modules/
+client/dist/
+
+# secrets and local data: never upload these
+.env
+server/.env
+*.sqlite
+*.sqlite-journal
+server/uploads/
+server/mail-outbox.log
+tests/.secrets.json
+php/site/app/config.php
+php/site/app/storage/
+mail.log
+
+# generated upload packages (contain live passwords and database dumps)
+deploy/php-subdomain/
+deploy/php-folder/
+deploy/hr-live-*.sql
+*.zip
+
+# editor and OS
+.vscode/
+.DS_Store
+Thumbs.db
+*.log

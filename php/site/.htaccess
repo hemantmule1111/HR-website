@@ -1,0 +1,68 @@
+# WorkPilot: web-server rules (Apache). Keep this file in the same folder as index.html.
+Options -Indexes
+
+# Backups, logs, settings and database files can never be downloaded, even if one is left in a public folder by mistake.
+<FilesMatch "\.(sql|log|bak|old|orig|ini|env|md|sh|lock|yml|yaml|zip|gz|tar)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+DirectoryIndex index.html
+
+# Lets a phone install the site as an app.
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+</IfModule>
+<FilesMatch "^(sw.js|manifest.webmanifest)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache"
+  </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "same-origin"
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(self), payment=(), usb=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Only this site's own scripts may run. This is what stops injected script code from stealing a sign-in.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  # Pages are never cached (so a new upload shows at once); the numbered program files can be cached for a year.
+  <FilesMatch "\.(html|php)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  <FilesMatch "^index-.*\.(js|css)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Some hosts drop the Authorization header before PHP sees it; this passes it through.
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # Always use https (people sign in on this site).
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Hidden files and folders (.git, .env, .htpasswd ...) can never be opened
+  RewriteRule (^|/)\.(?!well-known) - [F,L]
+
+  # The API
+  RewriteRule ^api/v1(/.*)?$ api/index.php [L,QSA]
+
+  # Private folders can never be opened from a browser
+  RewriteRule ^(app|database)(/|$) - [F,L]
+
+  # Every other address is a page of the web app
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
